@@ -1,0 +1,3 @@
+[submodule "emu2"]
+	path = emu2
+	url = https://github.com/donno2048/emu2

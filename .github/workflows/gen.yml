@@ -1,0 +1,36 @@
+name: generate gif
+on:
+  push:
+    paths-ignore: main.gif
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: $GITHUB_WORKFLOW
+  cancel-in-progress: true
+jobs:
+  gen:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        submodules: recursive
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - run: |
+        cd emu2
+        make
+        make install
+        cd ..
+        cargo install --git https://github.com/asciinema/agg
+        cargo install --locked --git https://github.com/asciinema/asciinema
+        gcc main.c -o main -lutil
+        asciinema rec main.cast -c ./main --return
+        agg main.cast main.gif --cols 60 --rows 50
+        git add main.gif
+        git config --global user.email "$GITHUB_REPOSITORY_OWNER_ID+$GITHUB_REPOSITORY_OWNER@users.noreply.github.com"
+        git config --global user.name "$GITHUB_REPOSITORY_OWNER"
+        git commit -m "$GITHUB_WORKFLOW" || true
+        git push || true
+        
