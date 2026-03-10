@@ -24,13 +24,14 @@ jobs:
         sudo make install
         cd ..
         sudo apt-get update
-        sudo apt-get install qrencode nasm -y --no-install-recommends
+        sudo apt-get install qrencode nasm libespeak-ng-dev -y --no-install-recommends
         cargo install --git https://github.com/asciinema/agg
         cargo install --locked --git https://github.com/asciinema/asciinema
-        gcc main.c -o main -lutil
+        gcc main.c -o main -lutil -lespeak-ng
         asciinema rec main.cast -c ./main --return
         agg main.cast main.gif --cols 110 --rows 50
-        git add main.gif
+        ffmpeg -f s16le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -c:a aac -b:a 128k -crf 0 -shortest output.mp4
+        git add main.gif output.mp4
         git config --global user.email "$GITHUB_REPOSITORY_OWNER_ID+$GITHUB_REPOSITORY_OWNER@users.noreply.github.com"
         git config --global user.name "$GITHUB_REPOSITORY_OWNER"
         git commit -m "$GITHUB_WORKFLOW" || true

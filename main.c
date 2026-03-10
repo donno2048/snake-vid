@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <stdio.h>
+#include <espeak-ng/speak_lib.h>
 #define small_delay() usleep(100000)
 #define delay() usleep(1000000)
 // generated on my system using:
@@ -45,7 +46,31 @@ void write_halt(const char *w, double seconds) {
     while (now() < end) write(STDOUT_FILENO, &c, read(fd, &c, 1));
 }
 
+static FILE *out_audio;
+static int sample_rate;
+static struct timespec audio_end = {0};
+
+int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
+    if (wav && numsamples) {
+        fwrite(wav, sizeof(short), numsamples, out_audio);
+        audio_end.tv_nsec += (1000000000LL * numsamples) / sample_rate;
+        audio_end.tv_sec += audio_end.tv_nsec / 1000000000LL;
+        audio_end.tv_nsec %= 1000000000LL;
+    }
+    return 0;
+}
+
+void audio_wait() {
+    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL);
+}
+
 int main() {
+    out_audio = fopen("main.raw", "wb");
+    sample_rate = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, NULL, 0);
+    FILE *sample_rate_file = fopen("fr.txt", "w");
+    fprintf(sample_rate_file, "%d", sample_rate);
+    fclose(sample_rate_file);
+    espeak_SetSynthCallback(synth_cb);
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
     while (1) {
@@ -54,7 +79,16 @@ int main() {
         ssize_t read;
         if ((read = getline(&line, &len, fp)) <= 0) break;
         line[read - 1] = 0;
-        shell(line);
+        if (line[0] != '#') {
+            shell(line);
+            audio_wait();
+        }
+        else {
+            audio_wait();
+            clock_gettime(CLOCK_MONOTONIC, &audio_end);
+            espeak_Synth(line + 1, strlen(line), 0, POS_CHARACTER,
+                         0, espeakCHARS_AUTO, NULL, NULL);
+        }
         free(line);
     }
     fclose(fp);
@@ -76,5 +110,7 @@ int main() {
         waitpid(pid, NULL, 0);
         printf(PS1);
     }
+    audio_wait();
+    fclose(out_audio);
     return 0;
 }
