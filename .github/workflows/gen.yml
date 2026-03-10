@@ -23,11 +23,13 @@ jobs:
         make
         sudo make install
         cd ..
+        sudo apt-get update
+        sudo apt-get install qrencode nasm -y --no-install-recommends
         cargo install --git https://github.com/asciinema/agg
         cargo install --locked --git https://github.com/asciinema/asciinema
         gcc main.c -o main -lutil
         asciinema rec main.cast -c ./main --return
-        agg main.cast main.gif --cols 60 --rows 50
+        agg main.cast main.gif --cols 110 --rows 50
         git add main.gif
         git config --global user.email "$GITHUB_REPOSITORY_OWNER_ID+$GITHUB_REPOSITORY_OWNER@users.noreply.github.com"
         git config --global user.name "$GITHUB_REPOSITORY_OWNER"
