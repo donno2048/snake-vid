@@ -66,7 +66,7 @@ int main() {
     else {
         _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com");
         write_halt("\x1b[B", 1.9);
-        write_halt("\x1b[D", 0.8);
+        write_halt("\x1b[D", 0.9);
         write_halt("\x1b[A", 0.8);
         write_halt("\x1b[D", 0.8);
         write_halt("\x1b[A", 0.3);
