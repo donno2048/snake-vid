@@ -24,7 +24,7 @@ jobs:
         sudo make install
         cd ..
         sudo apt-get update
-        sudo apt-get install qrencode nasm libespeak-ng-dev -y --no-install-recommends
+        sudo apt-get install qrencode nasm libespeak-ng-dev ffmpeg -y --no-install-recommends
         cargo install --git https://github.com/asciinema/agg
         cargo install --locked --git https://github.com/asciinema/asciinema
         gcc main.c -o main -lutil -lespeak-ng
