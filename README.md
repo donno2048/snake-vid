@@ -1,6 +1,6 @@
 ## snake-vid
 
-This generates a video about my [snake game](https://github.com/donno2048/snake].
+This generates a video about my [snake game](https://github.com/donno2048/snake).
 
 The reason for not using it's snake.asm directly is that the emulation platform I use, `emu2` doesn't support the `xadd` instruction.
 
