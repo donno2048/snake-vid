@@ -41,8 +41,7 @@ void _shell(const char *command, int wait_audio) {
         small_delay();
     }
     delay();
-    if (wait_audio)
-        audio_wait();
+    if (wait_audio) audio_wait();
     puts("");
 }
 
@@ -66,6 +65,12 @@ void write_halt(const char *w, double seconds) {
     while (now() < end) write(STDOUT_FILENO, &c, read(fd, &c, 1));
 }
 
+void say_comment(char *comment) {
+    clock_gettime(CLOCK_MONOTONIC, &audio_end);
+    espeak_Synth(comment + 1, strlen(comment), 0, POS_CHARACTER,
+                 0, espeakCHARS_AUTO, NULL, NULL);
+}
+
 int main() {
     out_audio = fopen("main.raw", "wb");
     sample_rate = espeak_Initialize(AUDIO_OUTPUT_RETRIEVAL, 0, NULL, 0);
@@ -75,20 +80,23 @@ int main() {
     fclose(sample_rate_file);
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
+    {
+        char *initial = NULL;
+        size_t len;
+        ssize_t read = getline(&initial, &len, fp);
+        initial[read - 1] = 0;
+        say_comment(initial);
+        audio_wait();
+        free(initial);
+    }
     while (1) {
         char *line = NULL;
         size_t len;
         ssize_t read;
         if ((read = getline(&line, &len, fp)) <= 0) break;
         line[read - 1] = 0;
-        if (line[0] != '#')
-            shell(line);
-        else {
-            audio_wait();
-            clock_gettime(CLOCK_MONOTONIC, &audio_end);
-            espeak_Synth(line + 1, strlen(line), 0, POS_CHARACTER,
-                         0, espeakCHARS_AUTO, NULL, NULL);
-        }
+        if (line[0] != '#') shell(line);
+        else say_comment(line);
         free(line);
     }
     fclose(fp);
@@ -97,19 +105,16 @@ int main() {
         setenv("EMU_SLOW_FACTOR", "200000", 1);
         execvp("emu2", (char*[]){"emu2", "snake.com", NULL});
     }
-    else {
-        _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com", 0);
-        write_halt("\x1b[B", 2.25);
-        write_halt("\x1b[D", 0.8);
-        write_halt("\x1b[A", 0.8);
-        write_halt("\x1b[D", 0.8);
-        write_halt("\x1b[A", 0.3);
-        write_halt("\x1b[D", 0.9);
-        write_halt("\x1b[A", 0.8);
-        write_halt("\x1b[1;7F", 0);
-        waitpid(pid, NULL, 0);
-        printf(PS1);
-    }
+    _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com", 0);
+    write_halt("\x1b[B", 2.25);
+    write_halt("\x1b[D", 0.8);
+    write_halt("\x1b[A", 0.8);
+    write_halt("\x1b[D", 0.8);
+    write_halt("\x1b[A", 0.3);
+    write_halt("\x1b[D", 0.9);
+    write_halt("\x1b[A", 0.8);
+    write_halt("\x1b[1;7F", 0);
+    waitpid(pid, NULL, 0);
     audio_wait();
     fclose(out_audio);
     return 0;
