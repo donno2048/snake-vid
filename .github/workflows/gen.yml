@@ -30,7 +30,7 @@ jobs:
         gcc main.c -o main -lutil -lespeak-ng
         asciinema rec main.cast -c ./main --return
         agg main.cast main.gif --cols 110 --rows 50
-        ffmpeg -f s16le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -c:a aac -b:a 128k -crf 0 -shortest output.mp4
+        ffmpeg -f s16le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -c:a aac -b:a 128k -crf 0 -shortest -y output.mp4
         git add main.gif output.mp4
         git config --global user.email "$GITHUB_REPOSITORY_OWNER_ID+$GITHUB_REPOSITORY_OWNER@users.noreply.github.com"
         git config --global user.name "$GITHUB_REPOSITORY_OWNER"
