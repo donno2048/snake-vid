@@ -66,11 +66,11 @@ void audio_wait() {
 
 int main() {
     out_audio = fopen("main.raw", "wb");
-    sample_rate = espeak_Initialize(AUDIO_OUTPUT_PLAYBACK, 0, NULL, 0);
+    sample_rate = espeak_Initialize(AUDIO_OUTPUT_RETRIEVAL, 0, NULL, 0);
+    espeak_SetSynthCallback(synth_cb);
     FILE *sample_rate_file = fopen("fr.txt", "w");
     fprintf(sample_rate_file, "%d", sample_rate);
     fclose(sample_rate_file);
-    espeak_SetSynthCallback(synth_cb);
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
     while (1) {
