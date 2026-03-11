@@ -14,38 +14,6 @@
 
 int fd;
 
-void _shell(const char *command) {
-    fflush(stdout);
-    delay();
-    for (; *command; command++) {
-        printf("%c", *command);
-        fflush(stdout);
-        small_delay();
-    }
-    delay();
-    puts("");
-}
-
-int shell(const char *command) {
-    _shell(command);
-    int status = system(command);
-    printf(PS1);
-    return status || !WIFEXITED(status) || WEXITSTATUS(status);
-}
-
-double now() {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ts.tv_sec + (double)ts.tv_nsec / 1e9;
-}
-
-void write_halt(const char *w, double seconds) {
-    write(fd, w, strlen(w));
-    char c;
-    double end = now() + seconds;
-    while (now() < end) write(STDOUT_FILENO, &c, read(fd, &c, 1));
-}
-
 static FILE *out_audio;
 static int sample_rate;
 static struct timespec audio_end = {0};
@@ -64,6 +32,40 @@ void audio_wait() {
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL);
 }
 
+void _shell(const char *command, int wait_audio) {
+    fflush(stdout);
+    delay();
+    for (; *command; command++) {
+        printf("%c", *command);
+        fflush(stdout);
+        small_delay();
+    }
+    delay();
+    if (wait_audio)
+        audio_wait();
+    puts("");
+}
+
+int shell(const char *command) {
+    _shell(command, 1);
+    int status = system(command);
+    printf(PS1);
+    return status || !WIFEXITED(status) || WEXITSTATUS(status);
+}
+
+double now() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + (double)ts.tv_nsec / 1e9;
+}
+
+void write_halt(const char *w, double seconds) {
+    write(fd, w, strlen(w));
+    char c;
+    double end = now() + seconds;
+    while (now() < end) write(STDOUT_FILENO, &c, read(fd, &c, 1));
+}
+
 int main() {
     out_audio = fopen("main.raw", "wb");
     sample_rate = espeak_Initialize(AUDIO_OUTPUT_RETRIEVAL, 0, NULL, 0);
@@ -79,10 +81,8 @@ int main() {
         ssize_t read;
         if ((read = getline(&line, &len, fp)) <= 0) break;
         line[read - 1] = 0;
-        if (line[0] != '#') {
+        if (line[0] != '#')
             shell(line);
-            audio_wait();
-        }
         else {
             audio_wait();
             clock_gettime(CLOCK_MONOTONIC, &audio_end);
@@ -98,7 +98,7 @@ int main() {
         execvp("emu2", (char*[]){"emu2", "snake.com", NULL});
     }
     else {
-        _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com");
+        _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com", 0);
         write_halt("\x1b[B", 2.25);
         write_halt("\x1b[D", 0.8);
         write_halt("\x1b[A", 0.8);
