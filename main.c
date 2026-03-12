@@ -90,8 +90,9 @@ int main() {
         ssize_t read;
         if ((read = getline(&line, &len, fp)) <= 0) break;
         line[read - 1] = 0;
-        if (line[0] != '#')
+        if (line[0] != '#') {
             if (shell(line)) exit(1);
+        }
         else say_comment(line);
         free(line);
     }
