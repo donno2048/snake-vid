@@ -29,6 +29,7 @@ int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
 }
 
 void audio_wait() {
+    espeak_Synchronize();
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL);
 }
 
@@ -66,6 +67,7 @@ void write_halt(const char *w, double seconds) {
 }
 
 void say_comment(char *comment) {
+    audio_wait();
     clock_gettime(CLOCK_MONOTONIC, &audio_end);
     espeak_Synth(comment + 1, strlen(comment), 0, POS_CHARACTER,
                  0, espeakCHARS_AUTO, NULL, NULL);
@@ -80,15 +82,7 @@ int main() {
     fclose(sample_rate_file);
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
-    {
-        char *initial = NULL;
-        size_t len;
-        ssize_t read = getline(&initial, &len, fp);
-        initial[read - 1] = 0;
-        say_comment(initial);
-        audio_wait();
-        free(initial);
-    }
+    clock_gettime(CLOCK_MONOTONIC, &audio_end);
     while (1) {
         char *line = NULL;
         size_t len;
