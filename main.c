@@ -67,6 +67,7 @@ void write_halt(const char *w, double seconds) {
 }
 
 void say_comment(char *comment) {
+    fflush(stdout);
     audio_wait();
     clock_gettime(CLOCK_MONOTONIC, &audio_end);
     espeak_Synth(comment + 1, strlen(comment), 0, POS_CHARACTER,
@@ -89,7 +90,8 @@ int main() {
         ssize_t read;
         if ((read = getline(&line, &len, fp)) <= 0) break;
         line[read - 1] = 0;
-        if (line[0] != '#') shell(line);
+        if (line[0] != '#')
+            if (shell(line)) exit(1);
         else say_comment(line);
         free(line);
     }
