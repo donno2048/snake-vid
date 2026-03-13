@@ -35,7 +35,7 @@ void audio_wait() {
     audio_end.tv_nsec += ns % 1000000000LL;
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
     audio_end.tv_nsec %= 1000000000LL;
-    while(clock_nanosleep(CLOCK_MONOTONIC_RAW, TIMER_ABSTIME, &audio_end, NULL) == EINTR);
+    while(clock_nanosleep(CLOCK_BOOTTIME, TIMER_ABSTIME, &audio_end, NULL) == EINTR);
 }
 
 void _shell(const char *command, int wait_audio) {
@@ -88,7 +88,7 @@ int main() {
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
     fflush(stdout);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &audio_start);
+    clock_gettime(CLOCK_BOOTTIME, &audio_start);
     while (1) {
         char *line = NULL;
         size_t len;
