@@ -16,7 +16,7 @@ int fd;
 
 static FILE *out_audio;
 static int sample_rate;
-static volatile long long samples = 0;
+static volatile long long samples = 2e5;
 static struct timespec audio_start = {0};
 
 int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
