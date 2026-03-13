@@ -5,6 +5,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <stdio.h>
+#include <errno.h>
 #include <espeak-ng/speak_lib.h>
 #define small_delay() usleep(100000)
 #define delay() usleep(1000000)
