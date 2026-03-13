@@ -17,26 +17,24 @@ int fd;
 static FILE *out_audio;
 static int sample_rate;
 static volatile long long samples = 0;
-static struct timespec audio_end = {0};
+static struct timespec audio_start = {0};
 
 int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
     if (wav && numsamples) {
         fwrite(wav, sizeof(short), numsamples, out_audio);
         samples += numsamples;
-        printf("%lld ", samples); fflush(stdout);
     }
     return 0;
 }
 
 void audio_wait() {
     espeak_Synchronize();
-    printf("  %lld  ", samples); fflush(stdout);
     long long ns = (1000000000LL * samples) / sample_rate;
+    struct timespec audio_end = audio_start;
     audio_end.tv_nsec += ns % 1000000000LL;
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
     audio_end.tv_nsec %= 1000000000LL;
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL);
-    samples = 0;
 }
 
 void _shell(const char *command, int wait_audio) {
@@ -75,7 +73,6 @@ void write_halt(const char *w, double seconds) {
 void say_comment(char *comment) {
     fflush(stdout);
     audio_wait();
-    clock_gettime(CLOCK_MONOTONIC, &audio_end);
     espeak_Synth(comment + 1, strlen(comment), 0, POS_CHARACTER,
                  0, espeakCHARS_AUTO, NULL, NULL);
 }
@@ -90,7 +87,7 @@ int main() {
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
     fflush(stdout);
-    clock_gettime(CLOCK_MONOTONIC, &audio_end);
+    clock_gettime(CLOCK_MONOTONIC, &audio_start);
     while (1) {
         char *line = NULL;
         size_t len;
