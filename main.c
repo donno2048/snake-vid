@@ -20,7 +20,7 @@ static volatile long long samples = 0;
 static struct timespec audio_start = {0};
 
 int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
-    if (wav && numsamples > 0) {
+    if (wav && numsamples) {
         fwrite(wav, sizeof(short), numsamples, out_audio);
         samples += numsamples;
     }
@@ -31,11 +31,10 @@ void audio_wait() {
     espeak_Synchronize();
     long long ns = (1000000000LL * samples) / sample_rate;
     struct timespec audio_end = audio_start;
-    clock_gettime(CLOCK_MONOTONIC, &audio_end); // plaster
     audio_end.tv_nsec += ns % 1000000000LL;
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
     audio_end.tv_nsec %= 1000000000LL;
-    clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL);
+    while(clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL) == EINTR);
 }
 
 void _shell(const char *command, int wait_audio) {
