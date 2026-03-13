@@ -23,14 +23,14 @@ int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
     if (wav && numsamples) {
         fwrite(wav, sizeof(short), numsamples, out_audio);
         samples += numsamples;
-        printf("%lld ", samples);
+        printf("%lld ", samples); fflush(stdout);
     }
     return 0;
 }
 
 void audio_wait() {
     espeak_Synchronize();
-    printf("  %lld  ", samples);
+    printf("  %lld  ", samples); fflush(stdout);
     long long ns = (1000000000LL * samples) / sample_rate;
     audio_end.tv_nsec += ns % 1000000000LL;
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
