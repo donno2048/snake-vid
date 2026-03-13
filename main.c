@@ -16,11 +16,11 @@ int fd;
 
 static FILE *out_audio;
 static int sample_rate;
-static volatile long long samples = 2e5; // ugly plaster
+static volatile long long samples = 0;
 static struct timespec audio_start = {0};
 
 int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
-    if (wav && numsamples) {
+    if (wav && numsamples > 0) {
         fwrite(wav, sizeof(short), numsamples, out_audio);
         samples += numsamples;
     }
@@ -31,6 +31,7 @@ void audio_wait() {
     espeak_Synchronize();
     long long ns = (1000000000LL * samples) / sample_rate;
     struct timespec audio_end = audio_start;
+    clock_gettime(CLOCK_MONOTONIC, &audio_end); // plaster
     audio_end.tv_nsec += ns % 1000000000LL;
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
     audio_end.tv_nsec %= 1000000000LL;
