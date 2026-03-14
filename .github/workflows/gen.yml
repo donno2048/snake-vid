@@ -34,6 +34,8 @@ jobs:
         cmake --build build
         cmake --install build
         cd ..
+        wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
+        wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
         gcc main.c -o main -lutil -lpiper -lonnxruntime
         asciinema rec main.cast -c ./main -i 1000 --return
         agg main.cast main.gif --cols 110 --rows 50 --theme monokai --no-loop
