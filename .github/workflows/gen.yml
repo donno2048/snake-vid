@@ -35,6 +35,8 @@ jobs:
         cmake --install build
         cd ../..
         mv piper1-gpl/libpiper/install/espeak-ng-data/ .
+        cp piper1-gpl/libpiper/install/libpiper.so /usr/lib/
+        cp piper1-gpl/libpiper/lib/onnxruntime*/lib/libonnxruntime.so.1 /usr/lib/
         git clone https://github.com/microsoft/onnxruntime --depth 1
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
