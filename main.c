@@ -17,9 +17,9 @@ int fd;
 
 static FILE *out_audio;
 static int sample_rate;
-static volatile long long samples = 0;
+static long long samples = 0;
 static struct timespec audio_start = {0};
-static piper_voice voice;
+piper_synthesizer *synth;
 
 struct timespec audio_wait() {
     struct timespec audio_end = audio_start;
@@ -46,9 +46,9 @@ void _shell(const char *command, int wait_audio) {
         clock_gettime(CLOCK_MONOTONIC, &now);
         long long secs = now.tv_sec - audio_end.tv_sec;
         if (secs < 1) secs = 1;
-        short zero = 0;
+        float zero = 0;
         for(int i = 0; i < sample_rate * secs; i++)
-            fwrite(&zero, sizeof(short), 1, out_audio);
+            fwrite(&zero, sizeof(float), 1, out_audio);
         samples += sample_rate * secs;
     }
     puts("");
@@ -77,21 +77,22 @@ void write_halt(const char *w, double seconds) {
 void say_comment(char *comment) {
     fflush(stdout);
     audio_wait();
-    piper_audio audio;
-    piper_synthesize(&voice, comment + 1, &audio);
-    fwrite(audio.samples, sizeof(short), audio.num_samples, out_audio);
-    samples += audio.num_samples;
-    piper_free_audio(&audio);
+    piper_synthesize_start(synth, comment + 1, NULL);
+    piper_audio_chunk audio;
+    while (piper_synthesize_next(synth, &audio) != PIPER_DONE) {
+        fwrite(audio.samples, sizeof(float), audio.num_samples, out_audio);
+        samples += audio.num_samples;
+    }
 }
 
 int main() {
     out_audio = fopen("main.raw", "wb");
-    piper_load_voice(
+    synth = piper_create(
         "en_US-lessac-medium.onnx",
         "en_US-lessac-medium.onnx.json",
-        &voice
+        "espeak-ng-data/"
     );
-    sample_rate = voice.config.sample_rate;
+    sample_rate = synth->sample_rate;
     FILE *sample_rate_file = fopen("fr.txt", "w");
     fprintf(sample_rate_file, "%d", sample_rate);
     fclose(sample_rate_file);
@@ -128,6 +129,6 @@ int main() {
     waitpid(pid, NULL, 0);
     audio_wait();
     fclose(out_audio);
-    piper_free_voice(&voice);
+    piper_free(synth);
     return 0;
 }
