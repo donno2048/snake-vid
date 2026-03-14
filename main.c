@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <espeak-ng/speak_lib.h>
 #define small_delay() usleep(100000)
+#define delay() usleep(1000000)
 // generated on my system using:
 // echo | bash --rcfile <(echo "PS1='$PS1'") -i 2>&1 | head -n1 | sed -n l | sed 's/\$$//'
 #define PS1 "\033[01;32mroot\033[00m@\033[01;34m/root/snake-vid\033[00m$ "
@@ -27,22 +28,15 @@ int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
     return 0;
 }
 
-void audio_wait() {
+struct timespec audio_wait() {
     espeak_Synchronize();
-    long long ns = (1000000000LL * samples) / sample_rate;
     struct timespec audio_end = audio_start;
+    long long ns = (1000000000LL * samples) / sample_rate;
     audio_end.tv_nsec += ns % 1000000000LL;
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
     audio_end.tv_nsec %= 1000000000LL;
     while(clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL) == EINTR);
-}
-
-void delay() {
-    short zero = 0;
-    for(int i = 0; i < sample_rate; i++)
-        fwrite(&zero, sizeof(short), 1, out_audio);
-    samples += sample_rate;
-    usleep(1000000);
+    return audio_end;
 }
 
 void _shell(const char *command, int wait_audio) {
@@ -54,7 +48,16 @@ void _shell(const char *command, int wait_audio) {
         small_delay();
     }
     delay();
-    if (wait_audio) audio_wait();
+    if (wait_audio) {
+        struct timespec now;
+        struct timespec audio_end = audio_wait();
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        long long sec_diff = audio_end.tv_sec - now.tv_sec;
+        short zero = 0;
+        for(int i = 0; i < sample_rate * sec_diff; i++)
+            fwrite(&zero, sizeof(short), 1, out_audio);
+        samples += sample_rate * sec_diff;
+    }
     puts("");
 }
 
