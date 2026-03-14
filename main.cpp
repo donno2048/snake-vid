@@ -7,11 +7,13 @@
 #include <stdio.h>
 #include <errno.h>
 #include <piper.h>
+#include <piper_impl.hpp>
 #define small_delay() usleep(100000)
 #define delay() usleep(1000000)
 // generated on my system using:
 // echo | bash --rcfile <(echo "PS1='$PS1'") -i 2>&1 | head -n1 | sed -n l | sed 's/\$$//'
 #define PS1 "\033[01;32mroot\033[00m@\033[01;34m/root/snake-vid\033[00m$ "
+extern "C" {
 
 int fd;
 
@@ -131,4 +133,6 @@ int main() {
     fclose(out_audio);
     piper_free(synth);
     return 0;
+}
+
 }
