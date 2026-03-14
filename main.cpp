@@ -117,7 +117,8 @@ int main() {
     int pid = forkpty(&fd, NULL, NULL, NULL);
     if (pid == 0) {
         setenv("EMU_SLOW_FACTOR", "200000", 1);
-        execvp("emu2", (char*[]){"emu2", "snake.com", NULL});
+        char *command[] = {"emu2", "snake.com", NULL};
+        execvp("emu2", command);
     }
     _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com", 0);
     write_halt("\x1b[B", 1.9);
