@@ -87,7 +87,6 @@ int main() {
     fclose(sample_rate_file);
     FILE *fp = fopen("main.sh", "r");
     printf(PS1);
-    fflush(stdout);
     clock_gettime(CLOCK_MONOTONIC, &audio_start);
     while (1) {
         char *line = NULL;
