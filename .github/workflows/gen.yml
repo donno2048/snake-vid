@@ -42,7 +42,7 @@ jobs:
         g++ -std=c++17 main.cpp -o main -I piper1-gpl/libpiper/install/include/ -I piper1-gpl/libpiper/include/ -I piper1-gpl/libpiper/lib/onnxruntime*/include/ -L piper1-gpl/libpiper/install/ -L piper1-gpl/libpiper/install/lib/ -lutil -lpiper -lonnxruntime
         asciinema rec main.cast -c ./main -i 1000 --return
         agg main.cast main.gif --cols 110 --rows 50 --theme monokai --no-loop
-        ffmpeg -f f16le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -af apad -c:a aac -b:a 128k -crf 0 -y -shortest output.mp4
+        ffmpeg -f f32le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -af apad -c:a aac -b:a 128k -crf 0 -y -shortest output.mp4
         git add main.gif output.mp4
         git config --global user.email "$GITHUB_REPOSITORY_OWNER_ID+$GITHUB_REPOSITORY_OWNER@users.noreply.github.com"
         git config --global user.name "$GITHUB_REPOSITORY_OWNER"
