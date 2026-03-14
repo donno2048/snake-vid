@@ -6,7 +6,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <errno.h>
-#include <piper/piper.h>
+#include <piper.h>
 #define small_delay() usleep(100000)
 #define delay() usleep(1000000)
 // generated on my system using:
