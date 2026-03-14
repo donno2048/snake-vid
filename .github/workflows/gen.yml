@@ -29,8 +29,8 @@ jobs:
         cargo install --locked --git https://github.com/asciinema/asciinema
         gcc main.c -o main -lutil -lespeak-ng
         asciinema rec main.cast -c ./main -i 1000 --return
-        agg main.cast main.gif --cols 110 --rows 50 --theme monokai
-        ffmpeg -f s16le -ar $(cat fr.txt) -ac 1 -i main.raw -ignore_loop 1 -i main.gif -c:v libx264 -af apad -c:a aac -b:a 128k -crf 0 -y output.mp4
+        agg main.cast main.gif --cols 110 --rows 50 --theme monokai --loop 0
+        ffmpeg -f s16le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -af apad -c:a aac -b:a 128k -crf 0 -y output.mp4
         git add main.gif output.mp4
         git config --global user.email "$GITHUB_REPOSITORY_OWNER_ID+$GITHUB_REPOSITORY_OWNER@users.noreply.github.com"
         git config --global user.name "$GITHUB_REPOSITORY_OWNER"
