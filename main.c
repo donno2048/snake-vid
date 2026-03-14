@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <espeak-ng/speak_lib.h>
 #define small_delay() usleep(100000)
-#define delay() usleep(1000000)
 // generated on my system using:
 // echo | bash --rcfile <(echo "PS1='$PS1'") -i 2>&1 | head -n1 | sed -n l | sed 's/\$$//'
 #define PS1 "\033[01;32mroot\033[00m@\033[01;34m/root/snake-vid\033[00m$ "
@@ -36,6 +35,12 @@ void audio_wait() {
     audio_end.tv_sec += ns / 1000000000LL + audio_end.tv_nsec / 1000000000LL;
     audio_end.tv_nsec %= 1000000000LL;
     while(clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &audio_end, NULL) == EINTR);
+}
+
+void delay() {
+    espeak_Synth("<break time='1s'/>", strlen("<break time='1s'/>") + 1, 0,
+                 POS_CHARACTER, 0, espeakCHARS_AUTO | espeakSSML, NULL, NULL);
+    usleep(1000000);
 }
 
 void _shell(const char *command, int wait_audio) {
