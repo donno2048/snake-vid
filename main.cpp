@@ -47,7 +47,7 @@ void _shell(const char *command, int wait_audio) {
         struct timespec audio_end = audio_wait();
         clock_gettime(CLOCK_MONOTONIC, &now);
         long long secs = now.tv_sec - audio_end.tv_sec;
-        if (secs < 1) secs = 1;
+        secs = secs < 1 ? 1 : secs + 1;
         float zero = 0;
         for(int i = 0; i < sample_rate * secs; i++)
             fwrite(&zero, sizeof(float), 1, out_audio);
