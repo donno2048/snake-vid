@@ -52,11 +52,11 @@ void _shell(const char *command, int wait_audio) {
         struct timespec now;
         struct timespec audio_end = audio_wait();
         clock_gettime(CLOCK_MONOTONIC, &now);
-        long long sec_diff = audio_end.tv_sec - now.tv_sec;
+        long long secs = now.tv_sec - audio_end.tv_sec;
         short zero = 0;
-        for(int i = 0; i < sample_rate * sec_diff; i++)
+        for(int i = 0; i < sample_rate * secs; i++)
             fwrite(&zero, sizeof(short), 1, out_audio);
-        samples += sample_rate * sec_diff;
+        samples += sample_rate * secs;
     }
     puts("");
 }
