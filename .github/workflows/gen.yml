@@ -34,6 +34,7 @@ jobs:
         cmake --build build
         cmake --install build
         cd ../..
+        mv piper1-gpl/libpiper/install/espeak-ng-data/ .
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
         gcc main.c -o main -I piper1-gpl/libpiper/install/include/ -L piper1-gpl/libpiper/install/ -L piper1-gpl/libpiper/install/lib/ -lutil -lpiper -lonnxruntime
