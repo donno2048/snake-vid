@@ -29,14 +29,14 @@ jobs:
         cargo install --locked --git https://github.com/asciinema/asciinema
         pip3 install --upgrade cmake
         git clone https://github.com/OHF-Voice/piper1-gpl --depth 1
-        cd piper1-gpl
+        cd piper1-gpl/libpiper
         cmake -Bbuild -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$PWD/install
         cmake --build build
         cmake --install build
-        cd ..
+        cd ../..
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json
-        gcc main.c -o main -lutil -lpiper -lonnxruntime
+        gcc main.c -o main -I piper1-gpl/libpiper/install/include/ -L piper1-gpl/libpiper/install/ -L piper1-gpl/libpiper/install/lib/ -lutil -lpiper -lonnxruntime
         asciinema rec main.cast -c ./main -i 1000 --return
         agg main.cast main.gif --cols 110 --rows 50 --theme monokai --no-loop
         ffmpeg -f s16le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -af apad -c:a aac -b:a 128k -crf 0 -y -shortest output.mp4
