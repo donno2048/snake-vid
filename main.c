@@ -38,8 +38,10 @@ void audio_wait() {
 }
 
 void delay() {
-    espeak_Synth("<break time='1s'/>", strlen("<break time='1s'/>") + 1, 0,
-                 POS_CHARACTER, 0, espeakCHARS_AUTO | espeakSSML, NULL, NULL);
+    short zero = 0;
+    for(int i = 0; i < sample_rate; i++)
+        fwrite(&zero, sizeof(short), 1, f);
+    samples += sample_rate;
     usleep(1000000);
 }
 
