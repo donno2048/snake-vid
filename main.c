@@ -6,7 +6,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <errno.h>
-#include <espeak-ng/speak_lib.h>
+#include <piper/piper.h>
 #define small_delay() usleep(100000)
 #define delay() usleep(1000000)
 // generated on my system using:
@@ -19,17 +19,9 @@ static FILE *out_audio;
 static int sample_rate;
 static volatile long long samples = 0;
 static struct timespec audio_start = {0};
-
-int synth_cb(short *wav, int numsamples, espeak_EVENT *events) {
-    if (wav && numsamples) {
-        fwrite(wav, sizeof(short), numsamples, out_audio);
-        samples += numsamples;
-    }
-    return 0;
-}
+static piper_voice voice;
 
 struct timespec audio_wait() {
-    espeak_Synchronize();
     struct timespec audio_end = audio_start;
     long long ns = (1000000000LL * samples) / sample_rate;
     audio_end.tv_nsec += ns % 1000000000LL;
@@ -85,14 +77,21 @@ void write_halt(const char *w, double seconds) {
 void say_comment(char *comment) {
     fflush(stdout);
     audio_wait();
-    espeak_Synth(comment + 1, strlen(comment), 0, POS_CHARACTER,
-                 0, espeakCHARS_AUTO, NULL, NULL);
+    piper_audio audio;
+    piper_synthesize(&voice, comment + 1, &audio);
+    fwrite(audio.samples, sizeof(short), audio.num_samples, out_audio);
+    samples += audio.num_samples;
+    piper_free_audio(&audio);
 }
 
 int main() {
     out_audio = fopen("main.raw", "wb");
-    sample_rate = espeak_Initialize(AUDIO_OUTPUT_RETRIEVAL, 0, NULL, 0);
-    espeak_SetSynthCallback(synth_cb);
+    piper_load_voice(
+        "en_US-lessac-medium.onnx",
+        "en_US-lessac-medium.onnx.json",
+        &voice
+    );
+    sample_rate = voice.config.sample_rate;
     FILE *sample_rate_file = fopen("fr.txt", "w");
     fprintf(sample_rate_file, "%d", sample_rate);
     fclose(sample_rate_file);
@@ -129,5 +128,6 @@ int main() {
     waitpid(pid, NULL, 0);
     audio_wait();
     fclose(out_audio);
+    piper_free_voice(&voice);
     return 0;
 }
