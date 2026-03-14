@@ -40,7 +40,7 @@ void audio_wait() {
 void delay() {
     short zero = 0;
     for(int i = 0; i < sample_rate; i++)
-        fwrite(&zero, sizeof(short), 1, f);
+        fwrite(&zero, sizeof(short), 1, out_audio);
     samples += sample_rate;
     usleep(1000000);
 }
