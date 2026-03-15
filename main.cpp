@@ -23,9 +23,10 @@ static int sample_rate;
 static volatile long long samples = 0;
 static struct timespec audio_start = {0};
 piper_synthesizer *synth;
-pthread_t audio_thread;
+pthread_t audio_thread = PTHREAD_NULL;
 
 struct timespec audio_wait() {
+    if (pthread_equal(audio_thread, PTHREAD_NULL)) return;
     pthread_join(audio_thread, NULL);
     struct timespec audio_end = audio_start;
     long long ns = (1000000000LL * samples) / sample_rate;
@@ -92,7 +93,7 @@ static void *say_comment_thread(void *comment) {
 
 void say_comment(char *comment) {
     fflush(stdout);
-    if (samples) audio_wait();
+    audio_wait();
     pthread_create(&audio_thread, NULL, say_comment_thread, strdup(comment + 1));
 }
 
