@@ -1,6 +1,6 @@
 # snake-vid
 
-This is a demo for the demo-ing program I made ([main.cpp](./main.cpp)), which let's you create mp4 from bash scripts ([main.sh](./main.sh)).
+[This](https://youtu.be/Wv1MnvnvAiY) is a demo for the demo-ing program I made ([main.cpp](./main.cpp)), which let's you create mp4 from bash scripts ([main.sh](./main.sh)).
 
 Currently in a demo stage...
 
