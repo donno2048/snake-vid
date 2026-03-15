@@ -26,7 +26,7 @@ piper_synthesizer *synth;
 pthread_t audio_thread = 0;
 
 struct timespec audio_wait() {
-    if (pthread_equal(audio_thread, 0) return;
+    if (pthread_equal(audio_thread, 0)) return;
     pthread_join(audio_thread, NULL);
     struct timespec audio_end = audio_start;
     long long ns = (1000000000LL * samples) / sample_rate;
