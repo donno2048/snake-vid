@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <piper.h>
+#include <pthread.h>
 #include <piper_impl.hpp>
 #define small_delay() usleep(100000)
 #define delay() usleep(1000000)
@@ -19,11 +20,13 @@ int fd;
 
 static FILE *out_audio;
 static int sample_rate;
-static long long samples = 0;
+static volatile long long samples = 0;
 static struct timespec audio_start = {0};
 piper_synthesizer *synth;
+pthread_t audio_thread;
 
 struct timespec audio_wait() {
+    pthread_join(audio_thread, NULL);
     struct timespec audio_end = audio_start;
     long long ns = (1000000000LL * samples) / sample_rate;
     audio_end.tv_nsec += ns % 1000000000LL;
@@ -47,7 +50,7 @@ void _shell(const char *command, int wait_audio) {
         struct timespec audio_end = audio_wait();
         clock_gettime(CLOCK_MONOTONIC, &now);
         long long secs = now.tv_sec - audio_end.tv_sec;
-        secs = secs < 1 ? 1 : secs;
+        secs = secs < 1 ? 1 : secs + 1;
         float zero = 0;
         for(int i = 0; i < sample_rate * secs; i++)
             fwrite(&zero, sizeof(float), 1, out_audio);
@@ -76,15 +79,20 @@ void write_halt(const char *w, double seconds) {
     while (now() < end) write(STDOUT_FILENO, &c, read(fd, &c, 1));
 }
 
-void say_comment(char *comment) {
-    fflush(stdout);
-    audio_wait();
+static void *say_comment_thread(char *comment) {
     piper_synthesize_start(synth, comment + 1, NULL);
     piper_audio_chunk audio;
     while (piper_synthesize_next(synth, &audio) != PIPER_DONE) {
         fwrite(audio.samples, sizeof(float), audio.num_samples, out_audio);
         samples += audio.num_samples;
     }
+    return NULL;
+}
+
+void say_comment(char *comment) {
+    fflush(stdout);
+    audio_wait();
+    pthread_create(&audio_thread, NULL, say_comment_thread, comment);
 }
 
 int main() {
