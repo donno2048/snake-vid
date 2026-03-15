@@ -23,10 +23,10 @@ static int sample_rate;
 static volatile long long samples = 0;
 static struct timespec audio_start = {0};
 piper_synthesizer *synth;
-pthread_t audio_thread = PTHREAD_NULL;
+pthread_t audio_thread = 0;
 
 struct timespec audio_wait() {
-    if (pthread_equal(audio_thread, PTHREAD_NULL)) return;
+    if (pthread_equal(audio_thread, 0) return;
     pthread_join(audio_thread, NULL);
     struct timespec audio_end = audio_start;
     long long ns = (1000000000LL * samples) / sample_rate;
