@@ -39,7 +39,7 @@ jobs:
         sudo cp piper1-gpl/libpiper/lib/onnxruntime*/lib/libonnxruntime.so.1 /usr/lib/
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx
         wget https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ryan/high/en_US-ryan-high.onnx.json
-        g++ -std=c++17 main.cpp -o main -I piper1-gpl/libpiper/install/include/ -I piper1-gpl/libpiper/include/ -I piper1-gpl/libpiper/lib/onnxruntime*/include/ -L piper1-gpl/libpiper/install/ -L piper1-gpl/libpiper/install/lib/ -lutil -lpiper -lonnxruntime
+        g++ -std=c++17 main.cpp -o main -I piper1-gpl/libpiper/install/include/ -I piper1-gpl/libpiper/include/ -I piper1-gpl/libpiper/lib/onnxruntime*/include/ -L piper1-gpl/libpiper/install/ -L piper1-gpl/libpiper/install/lib/ -lutil -lpiper -lonnxruntime -pthread
         asciinema rec main.cast -c ./main -i 1000 --return
         agg main.cast main.gif --cols 110 --rows 50 --theme monokai --no-loop
         ffmpeg -f f32le -ar $(cat fr.txt) -ac 1 -i main.raw -i main.gif -c:v libx264 -af apad -c:a aac -b:a 128k -crf 0 -y -shortest output.mp4
