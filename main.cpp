@@ -130,6 +130,7 @@ int main() {
         execvp("emu2", command);
     }
     _shell("EMU_SLOW_FACTOR=200000 emu2 snake.com", 0);
+    audio_wait();
     write_halt("\x1b[B", 1.9);
     write_halt("\x1b[D", 0.9);
     write_halt("\x1b[A", 0.7);
@@ -139,7 +140,6 @@ int main() {
     write_halt("\x1b[A", 0.8);
     write_halt("\x1b[1;7F", 0);
     waitpid(pid, NULL, 0);
-    audio_wait();
     fclose(out_audio);
     piper_free(synth);
     return 0;
