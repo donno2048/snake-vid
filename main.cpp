@@ -50,7 +50,7 @@ void _shell(const char *command, int wait_audio) {
         struct timespec audio_end = audio_wait();
         clock_gettime(CLOCK_MONOTONIC, &now);
         long long secs = now.tv_sec - audio_end.tv_sec;
-        secs = secs < 1 ? 1 : secs + 1;
+        secs = secs < 1 ? 1 : secs;
         float zero = 0;
         for(int i = 0; i < sample_rate * secs; i++)
             fwrite(&zero, sizeof(float), 1, out_audio);
@@ -86,13 +86,14 @@ static void *say_comment_thread(void *comment) {
         fwrite(audio.samples, sizeof(float), audio.num_samples, out_audio);
         samples += audio.num_samples;
     }
+    free(comment);
     return NULL;
 }
 
 void say_comment(char *comment) {
     fflush(stdout);
-    audio_wait();
-    pthread_create(&audio_thread, NULL, say_comment_thread, comment);
+    if (samples) audio_wait();
+    pthread_create(&audio_thread, NULL, say_comment_thread, strdup(comment));
 }
 
 int main() {
