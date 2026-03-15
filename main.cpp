@@ -79,7 +79,7 @@ void write_halt(const char *w, double seconds) {
     while (now() < end) write(STDOUT_FILENO, &c, read(fd, &c, 1));
 }
 
-static void *say_comment_thread(char *comment) {
+static void *say_comment_thread(void *comment) {
     piper_synthesize_start(synth, comment + 1, NULL);
     piper_audio_chunk audio;
     while (piper_synthesize_next(synth, &audio) != PIPER_DONE) {
