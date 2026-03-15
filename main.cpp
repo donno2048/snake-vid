@@ -80,7 +80,7 @@ void write_halt(const char *w, double seconds) {
 }
 
 static void *say_comment_thread(void *comment) {
-    piper_synthesize_start(synth, comment + 1, NULL);
+    piper_synthesize_start(synth, ((const char*)comment) + 1, NULL);
     piper_audio_chunk audio;
     while (piper_synthesize_next(synth, &audio) != PIPER_DONE) {
         fwrite(audio.samples, sizeof(float), audio.num_samples, out_audio);
