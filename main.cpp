@@ -90,8 +90,8 @@ void say_comment(char *comment) {
 int main() {
     out_audio = fopen("main.raw", "wb");
     synth = piper_create(
-        "en_US-lessac-medium.onnx",
-        "en_US-lessac-medium.onnx.json",
+        "en_US-ryan-high.onnx",
+        "en_US-ryan-high.onnx.json",
         "espeak-ng-data/"
     );
     sample_rate = synth->sample_rate;
