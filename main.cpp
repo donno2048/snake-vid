@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <signal.h>
 #include <stdio.h>
 #include <errno.h>
 #include <piper.h>
@@ -138,8 +139,7 @@ int main() {
     write_halt("\x1b[A", 0.3);
     write_halt("\x1b[D", 0.9);
     write_halt("\x1b[A", 0.8);
-    write_halt("\x1b[1;7F", 0);
-    waitpid(pid, NULL, 0);
+    kill(pid, SIGKILL);
     fclose(out_audio);
     piper_free(synth);
     return 0;
